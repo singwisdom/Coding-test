@@ -15,19 +15,16 @@ for i in range(10):
         my_que.append(int(num)) # 8자리의 번호를 입력받아서 덱에 저장
 
     while True :
-        for j in range(5):
-            num = my_que[0] - (j+1)
+        for j in range(1,6):
+            num = my_que.popleft() - j
             if num <= 0 : # 0이 된다면 반복문 빠져나옴
                 is_zero = True
-                my_que.popleft()
                 my_que.append(0)
                 break
             else : 
-                my_que.popleft()
                 my_que.append(num)
 
         if is_zero == True : break
 
-    for num in my_que :
-        result += str(num)+' '
+    result = ' '.join(map(str, my_que)) # 리스트 컴프리헨션, join 메서드 사용
     print(f'#{n} {result}') # 결과 출력
