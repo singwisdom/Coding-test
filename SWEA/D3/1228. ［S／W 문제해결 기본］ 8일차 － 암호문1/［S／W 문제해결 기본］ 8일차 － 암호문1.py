@@ -18,10 +18,10 @@ for i in range(10):
     for j in string :
         if j.isalpha() : # 명령어가 알파벳인 경우
             if len(new_string) != 0 : # 이전에 저장된 명령문 함수 전달 후 초기화
-                I(int(new_string[1]),int(new_string[2]),new_string[3:3+int(new_string[2])])   
+                I(int(new_string[1]),int(new_string[2]),new_string[3:])   
                 new_string.clear()
         new_string.append(j)
-    I(int(new_string[1]),int(new_string[2]),new_string[3:3+int(new_string[2])]) # 마지막 명령문 함수 전달
+    I(int(new_string[1]),int(new_string[2]),new_string[3:]) # 마지막 명령문 함수 전달
 
     result = ""
     for num in range(10) :
