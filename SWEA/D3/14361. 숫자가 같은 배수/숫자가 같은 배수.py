@@ -10,6 +10,7 @@ def is_possible(permu, num_list):
             for j in range(len(permu[i])) :
                 tmp += permu[i][j] # 순열을 다 더해준다.
             if int(tmp) % num == 0 : return 'possible'
+    return 'impossible' # 다 돌았는데도 불가능할때
 
 tc = int(input())
 for t in range(1,tc+1):
@@ -18,5 +19,4 @@ for t in range(1,tc+1):
     permu = list(permutations(num_list, len(num_list)))
 
     res = is_possible(permu, num_list)
-    if res == 'possible' : print(f'#{t} {res}')
-    else : print(f'#{t} impossible')
+    print(f'#{t} {res}')
