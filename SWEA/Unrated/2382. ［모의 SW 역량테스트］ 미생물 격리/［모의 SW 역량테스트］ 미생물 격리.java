@@ -48,34 +48,31 @@ public class Solution {
 				list.add(new Micro(i + 1, tmp[0], tmp[1], tmp[2], tmp[3])); // 군집의 넘버링은 1부터 시작 !!
 			}
 
-
 			// M만큼 반복 아래 2개 -> 돌려보고 나중에 추가하기
 			for (int time = 1; time <= M; time++) {
 				// 군집의 count가 0이 아닌 애들만 큐에 넣어주기
 
 				for (int i = 0; i < list.size(); i++) {
-					if (list.get(i).count!=0) {
+					if (list.get(i).count != 0) {
 						queue.add(list.get(i)); // 큐에 미생물 군집 정보 넣어주기
 					}
-				}				
+				}
 
 				// BFS로 돌리기
 				bfs();
-				
-				// 다 돌리고 Iterator를 사용하여 count가 0인 요소 제거
-		        Iterator<Micro> iterator = list.iterator();
-		        while (iterator.hasNext()) {
-		            Micro micro = iterator.next();
-		            if (micro.count == 0) {
-		                iterator.remove();
-		            }
-		        }
+
+				// 다 돌리고 count가 0인 요소 제거
+				for (int i = list.size() - 1; i >= 0; i--) {
+					if (list.get(i).count == 0)
+						list.remove(i);
+				}
 			}
 
 			// 답 구하기
 			int sum = 0;
-			for (int i = 0; i <list.size(); i++) {
-				if(list.get(i).count!=0) sum += list.get(i).count;
+			for (int i = 0; i < list.size(); i++) {
+				if (list.get(i).count != 0)
+					sum += list.get(i).count;
 			}
 			bw.write("#" + tc + " " + sum + "\n");
 
@@ -90,7 +87,8 @@ public class Solution {
 			// 큐에서 꺼내서 이동하기
 			Micro m = queue.poll();
 
-			//System.out.println("현재 미생물 위치" + m.r + " " + m.c + " " + "미생물 정보:" + m.name + " 개수:" + m.count + " 방향:" + m.dir);
+			// System.out.println("현재 미생물 위치" + m.r + " " + m.c + " " + "미생물 정보:" + m.name +
+			// " 개수:" + m.count + " 방향:" + m.dir);
 			m.r = m.r + dr[m.dir];
 			m.c = m.c + dc[m.dir];
 		}
@@ -111,53 +109,51 @@ public class Solution {
 				// 위치, 미생물 개수 업데이트 하기
 				m.count /= 2;
 			}
-			
+
 			else {
 				ArrayList<Micro> tmpList = new ArrayList<>();
 				int max = 0;
-				
+
 				// 같은 구역에 있는 애들 찾기
 				for (int j = 0; j < list.size(); j++) {
 					// 같은 구역에 있다면,
 					if (list.get(j).r == m.r && list.get(j).c == m.c) {
 						tmpList.add(list.get(j));
 						max = Math.max(max, list.get(j).count);
-						
+
 					}
 				}
-				
+
 				int sum = 0;
 				int maxMicroIdx = -1;
 				for (int j = 0; j < tmpList.size(); j++) {
 					Micro tmp = tmpList.get(j);
 					// 합쳐질 애들의 미생물 개수만 담기
-					if(tmp.count!=max) {
-						sum+=tmp.count;
+					if (tmp.count != max) {
+						sum += tmp.count;
 						tmp.count = 0;
-					}
-					else {
+					} else {
 						maxMicroIdx = j;
 					}
 				}
 				// 다 돌고 난 후 maxIdx에 count값 저장하기
-				if(maxMicroIdx>=0) tmpList.get(maxMicroIdx).count+= sum;
+				if (maxMicroIdx >= 0)
+					tmpList.get(maxMicroIdx).count += sum;
 			}
 
-			
-			
 		}
 
 	}
 
-
 	// 디버깅용 함수
 	private static void print() {
-		
+
 		for (int i = 0; i < list.size(); i++) {
 			Micro m = list.get(i);
-			if(m.count!=0) map[m.r][m.c] = m.count;
+			if (m.count != 0)
+				map[m.r][m.c] = m.count;
 		}
-		
+
 		for (int i = 0; i < N; i++) {
 			System.out.println(Arrays.toString(map[i]));
 		}
