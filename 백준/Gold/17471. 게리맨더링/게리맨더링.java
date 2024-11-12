@@ -1,126 +1,143 @@
-
 import java.io.*;
 import java.util.*;
 
 public class Main {
 
-	
-	static class Node{
-		int v;
-		
-		Node(int v){
-			this.v = v;
+	static int N, minPeople;
+	static int[] people, arr;
+	static boolean[] visit;
+	static ArrayList<Node>[] list;
+	static ArrayList<Integer> red, blue;
+
+	static class Node {
+		int num;
+
+		public Node(int num) {
+			super();
+			this.num = num;
 		}
+
 	}
-	
-	static int[] arr, people;
-	static ArrayList<Node>[] adjList;
-	static List<Integer> arr_red = new ArrayList<>();
-	static List<Integer> arr_blue = new ArrayList<>();
-	static int min = Integer.MAX_VALUE;
-	static int n;
-	
-	public static void main(String[] args) throws IOException{
+
+	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
-		n = Integer.parseInt(br.readLine()); // 구역 수 
-		adjList = new ArrayList[n+1]; // 인접리스트
-		
-		arr = new int[n];
-		for (int i = 0; i < n; i++) arr[i] = i+1;
-		
-		people = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray(); // 인구 수 
-	
-		for (int i = 1; i <= n; i++) {
-			adjList[i] = new ArrayList();
-			int[] tmp= Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-			for (int j = 0; j < tmp[0]; j++) {
-				adjList[i].add(new Node(tmp[j+1])); // 인접리스트에 연결된 노드 추가
-			}
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+		StringTokenizer st;
+
+		N = Integer.parseInt(br.readLine().trim()); // 선거구의 개수
+		people = new int[N];
+		arr = new int[N + 1];
+		visit = new boolean[N + 1];
+		list = new ArrayList[N + 1]; // 선거구의 연결리스트
+		minPeople = Integer.MAX_VALUE;
+
+		st = new StringTokenizer(br.readLine().trim());
+		for (int i = 0; i < N; i++) {
+			people[i] = Integer.parseInt(st.nextToken()); // 인구 수 입력받기
 		}
-		
-		boolean[] sel = new boolean[arr.length];
-		recursive(0,0,sel); // 부분집합 구하기
-		if(min== Integer.MAX_VALUE) System.out.println(-1);
-		else System.out.println(min);
-		
+
+		for (int i = 1; i <= N; i++) {
+			list[i] = new ArrayList<Node>(); // ArrayList 초기화
+		}
+
+		for (int i = 1; i < arr.length; i++) {
+			arr[i] = i; // 부분집합을 구하기 위해 배열을 입력
+		}
+
+		// TC 입력받기
+		for (int i = 1; i <= N; i++) {
+			st = new StringTokenizer(br.readLine().trim());
+			int tmp = Integer.parseInt(st.nextToken());
+			for (int j = 0; j < tmp; j++) {
+				list[i].add(new Node(Integer.parseInt(st.nextToken())));
+			}
+
+		}
+
+		doGary(1); // 게리맨더링 구하기
+		int res = (minPeople == Integer.MAX_VALUE) ? -1 : minPeople;
+		bw.write(res + "\n");
+		bw.close();
+
 	}
-	
-	private static void recursive(int idx, int k, boolean[] sel) {
-		
-		// basis part(반복의 횟수)
-		if(idx == arr.length){
-			for (int i = 0; i < sel.length; i++) {
-				if(sel[i] == true) {
-					arr_red.add(arr[i]);
-				}
-				else if(sel[i]==false) {
-					arr_blue.add(arr[i]);
-					
+
+	private static void doGary(int idx) {
+		if (idx == arr.length) {
+			red = new ArrayList<>();
+			blue = new ArrayList<>();
+
+			for (int i = 1; i < visit.length; i++) {
+				if (visit[i] == true) {
+					red.add(i);
+				} else
+					blue.add(i);
+			}
+
+			if (red.size() != 0 && blue.size() != 0) {
+				boolean isRedConnection = isAllConnection(red); // red, blue가 각각 연결이 되었는지 확인
+				boolean isBlueConnection = isAllConnection(blue);
+
+				//System.out.println("=======================");
+				if (isRedConnection && isBlueConnection) {
+					calculatePeople(); // 인구수 계산하기
 				}
 			}
-			if(arr_red.size()!=n && arr_blue.size()!=n && arr_red.size()!=0 && arr_blue.size()!=0) {
-				boolean red = bfs(arr_red, new boolean[n+1]);
-				boolean blue = bfs(arr_blue, new boolean[n+1]);
-				
-				if(red && blue) {
-					int tmp1 = 0;
-					int tmp2 = 0;
-					
-					for (int i = 0; i < arr_red.size(); i++) {
-						tmp1+=people[arr_red.get(i)-1];
-						//System.out.println(arr_red.get(i));
-					}
-					for (int i = 0; i < arr_blue.size(); i++) {
-						tmp2+=people[arr_blue.get(i)-1];
-					}
-					min = Math.min(min, Math.abs(tmp1-tmp2));
-				}
-			}
-			
-			arr_red.clear();
-			arr_blue.clear();
 			return;
 		}
-		
-		// inductive part(하나의 반복의 순간에 발생할 수 있는 모든 경우)
+
 		// 선택하는 경우
-		sel[idx] = true;
-		recursive(idx+1, k+1, sel);
-		
+		visit[idx] = true;
+		doGary(idx + 1);
+
 		// 선택하지 않는 경우
-		sel[idx] = false;
-		recursive(idx+1, k, sel);
-		
+		visit[idx] = false;
+		doGary(idx + 1);
+
 	}
-	
-	private static boolean bfs(List<Integer> arr, boolean[] v) {
+
+	private static boolean isAllConnection(ArrayList<Integer> arr) {
+
+		//System.out.println(Arrays.toString(arr.toArray()));
 		
-		Queue<Integer> queue = new ArrayDeque();
-		int count = 1;
-		queue.offer(arr.get(0));
-		v[arr.get(0)] = true;
+		ArrayDeque<Integer> queue = new ArrayDeque<>();
+		int countArea = 0;
+		boolean[] visitArea = new boolean[N+1];
+		
+		queue.offer(arr.get(0)); // 0번 인덱스부터 넣읍시다.
+		visitArea[arr.get(0)] = true;
+		countArea+=1;
 		
 		while(!queue.isEmpty()) {
-			Integer p = queue.poll();
-			
-			for (int i = 0; i < adjList[p].size(); i++) {
-				if(arr.contains(adjList[p].get(i).v)) {
-					if(!v[adjList[p].get(i).v]) {
-						v[adjList[p].get(i).v] = true;
-						count+=1; // arr의 size와 현재 방문한 노드의 번호가 같은지 확인하는 변수
-						Node n = adjList[p].get(i);
-						queue.offer(n.v);
-					}
-					
+			int vertex = queue.poll();
+			for (int i = 0; i < list[vertex].size(); i++) {
+				int tmpVertex = list[vertex].get(i).num;
+				// 연결된 선거구이고, 아직 방문을 안했다면 방문처리 해주자
+				if(arr.contains(tmpVertex) && !visitArea[tmpVertex]) {
+					visitArea[tmpVertex] = true;
+					queue.offer(tmpVertex);
+					countArea +=1;
 				}
 			}
 		}
-		//System.out.println(arr.size()+ " "+count);
-		if(arr.size() == count) return true;
-		else return false;
 		
+		if(countArea == arr.size()) return true;
+		return false;
 	}
+
 	
+	private static void calculatePeople() {
+		int redCount = 0, blueCount = 0;
+
+		for (int vertex : red) {
+			redCount += people[vertex - 1]; // 레드 구역 인구수 더하기
+		}
+
+		for (int vertex : blue) {
+			blueCount += people[vertex - 1]; // 블루 구역 인구수 더하기
+		}
+
+		minPeople = Math.min(minPeople, Math.abs(redCount - blueCount));
+
+	}
 
 }
